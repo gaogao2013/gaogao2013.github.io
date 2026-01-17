@@ -3,749 +3,1559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实用工具箱 - gaogao2013的工具站</title>
+    <title>专业五子棋AI - Minimax Alpha-Beta优化版</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
             min-height: 100vh;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
-        header {
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        
+        .header {
             text-align: center;
-            margin-bottom: 40px;
-            color: white;
-        }
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
             margin-bottom: 30px;
         }
-        /* 导航菜单 */
-        .nav-menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .nav-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-        }
-        .nav-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-        .nav-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-        }
-        .nav-title {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #4a5568;
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.2em;
             margin-bottom: 10px;
         }
-        .nav-desc {
-            color: #718096;
-            font-size: 0.9em;
+        
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1em;
         }
-        /* 工具内容区域 */
-        .tool-section {
-            display: none;
-            background: white;
+        
+        .game-area {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .left-panel {
+            flex: 2;
+            min-width: 500px;
+        }
+        
+        .right-panel {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
             border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 25px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f0f7ff, #e3f2fd);
+            border-radius: 10px;
+            border-left: 5px solid #2196F3;
         }
-        .tool-section.active {
-            display: block;
-        }
-        .back-btn {
-            background: #a0aec0;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .back-btn:hover {
-            background: #718096;
-        }
-        .tool-header {
+        
+        .player-info {
             display: flex;
             align-items: center;
-            margin-bottom: 25px;
+            gap: 15px;
         }
-        .tool-icon {
-            font-size: 2em;
-            margin-right: 15px;
-        }
-        .tool-title {
-            font-size: 1.6em;
+        
+        .player-indicator {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            color: #4a5568;
+            font-size: 1.3em;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
         }
-        .tool-content {
-            margin-top: 20px;
-        }
-        textarea, input, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.3s ease;
-            margin-bottom: 10px;
-        }
-        textarea:focus, input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        
+        .black-indicator {
+            background: linear-gradient(135deg, #333, #000);
             color: white;
-            border: none;
-            padding: 12px 25px;
+            border: 3px solid #666;
+        }
+        
+        .white-indicator {
+            background: linear-gradient(135deg, #fff, #f5f5f5);
+            color: #333;
+            border: 3px solid #ddd;
+        }
+        
+        .board-container {
+            position: relative;
+            background: linear-gradient(135deg, #deb887, #cd853f);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        #boardCanvas {
+            display: block;
+            background: #f0d9b5;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            margin: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .result {
+        
+        .ai-thinking {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
             margin-top: 15px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .forbidden-warning {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            border: 2px solid #f44336;
+            color: #c62828;
             padding: 15px;
-            background: #f7fafc;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            word-break: break-all;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: shake 0.5s;
         }
-        .color-preview {
-            width: 100%;
-            height: 60px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border: 2px solid #e2e8f0;
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
-        .timer-display {
-            font-size: 2em;
-            text-align: center;
-            margin: 20px 0;
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 14px 28px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             font-weight: bold;
-            color: #4a5568;
+            flex: 1;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        footer {
-            text-align: center;
+        
+        .primary-btn {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
             color: white;
-            margin-top: 50px;
-            opacity: 0.8;
         }
-        .tool-section {
-            margin-bottom: 10px;
+        
+        .secondary-btn {
+            background: linear-gradient(135deg, #2196F3, #1565C0);
+            color: white;
         }
-        .calc-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-            margin: 10px 0;
+        
+        .ai-btn {
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+            color: white;
         }
-        .calc-btn {
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .ai-controls {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .ai-controls h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ai-level-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .level-btn {
+            flex: 1;
+            padding: 12px;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .level-btn:hover {
+            background: #e3f2fd;
+            border-color: #2196F3;
+        }
+        
+        .level-btn.active {
+            background: #2196F3;
+            color: white;
+            border-color: #1565C0;
+            font-weight: bold;
+        }
+        
+        .value-table {
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
             padding: 15px;
-            font-size: 1.2em;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .value-table h4 {
+            color: #333;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .value-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .value-item:last-child {
+            border-bottom: none;
+        }
+        
+        .pattern-name {
+            font-weight: bold;
+        }
+        
+        .pattern-value {
+            color: #2196F3;
+            font-weight: bold;
+        }
+        
+        .move-history {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .history-title {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .history-item.ai-move {
+            border-left-color: #9C27B0;
+            background: #f3e5f5;
+        }
+        
+        .ai-stats {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        @media (max-width: 1100px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .left-panel, .right-panel {
+                min-width: 100%;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            #boardCanvas {
+                width: 350px !important;
+                height: 350px !important;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🛠️ 实用工具箱</h1>
-            <p class="subtitle">简单 · 高效 · 实用 - 选择你需要的工具</p>
+        <div class="header">
+            <h1>🤖 专业五子棋AI - Minimax Alpha-Beta优化版</h1>
+            <p class="subtitle">智能搜索算法 + 完整禁手规则 + 深度思考策略</p>
+        </div>
+        
+        <div class="game-area">
+            <div class="left-panel">
+                <div class="game-info">
+                    <div class="player-info">
+                        <div class="player-indicator black-indicator" id="currentPlayerIndicator">●</div>
+                        <div>
+                            <div id="currentPlayerText">黑棋 (玩家)</div>
+                            <div id="gameStatus" style="font-size: 0.9em; color: #666;">游戏中...</div>
+                        </div>
+                    </div>
+                    <div id="scoreInfo" style="font-weight: bold; color: #2196F3;">
+                        Minimax AI | 深度: 4
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div class="board-container">
+                        <canvas id="boardCanvas" width="450" height="450"></canvas>
+                    </div>
+                </div>
+                
+                <div class="ai-thinking" id="aiThinking">
+                    <div class="spinner"></div>
+                    <span>🤔 AI正在思考中... 深度: <span id="aiDepth">4</span></span>
+                </div>
+                
+                <div class="forbidden-warning" id="forbiddenWarning">
+                    <strong>❌ 禁手阻止！</strong>
+                    <span id="forbiddenReason">此位置违反禁手规则</span>
+                </div>
+                
+                <div class="controls">
+                    <button class="primary-btn" id="restartBtn">🔄 重新开始</button>
+                    <button class="secondary-btn" id="undoBtn">↩️ 悔棋一步</button>
+                    <button class="ai-btn" id="aiMoveBtn">🤖 AI走一步</button>
+                </div>
+            </div>
             
-            <!-- 导航菜单 -->
-            <div class="nav-menu" id="navMenu">
-                <div class="nav-card" onclick="showTool('text-tool')">
-                    <div class="nav-icon">📝</div>
-                    <div class="nav-title">文本处理</div>
-                    <div class="nav-desc">大小写转换、文本反转、字数统计等</div>
-                </div>
-                
-                <div class="nav-card" onclick="showTool('code-tool')">
-                    <div class="nav-icon">🔐</div>
-                    <div class="nav-title">编码解码</div>
-                    <div class="nav-desc">Base64、URL编码解码工具</div>
-                </div>
-                
-                <div class="nav-card" onclick="showTool('color-tool')">
-                    <div class="nav-icon">🎨</div>
-                    <div class="nav-title">颜色工具</div>
-                    <div class="nav-desc">颜色选择器、HEX/RGB转换</div>
-                </div>
-                
-                <div class="nav-card" onclick="showTool('timer-tool')">
-                    <div class="nav-icon">⏱️</div>
-                    <div class="nav-title">计时器</div>
-                    <div class="nav-desc">正计时、倒计时功能</div>
-                </div>
-                
-                <div class="nav-card" onclick="showTool('unit-tool')">
-                    <div class="nav-icon">📏</div>
-                    <div class="nav-title">单位换算</div>
-                    <div class="nav-desc">长度、温度单位转换</div>
-                </div>
-                
-                <div class="nav-card" onclick="showTool('calc-tool')">
-                    <div class="nav-icon">🧮</div>
-                    <div class="nav-title">计算器</div>
-                    <div class="nav-desc">数学计算、随机数生成</div>
-                </div>
-            </div>
-        </header>
-
-        <!-- 文本处理工具 -->
-        <div class="tool-section" id="text-tool">
-            <button class="back-btn" onclick="showMainMenu()">← 返回主菜单</button>
-            <div class="tool-header">
-                <div class="tool-icon">📝</div>
-                <div class="tool-title">文本处理工具</div>
-            </div>
-            <div class="tool-content">
-                <textarea id="textInput" placeholder="在这里输入要处理的文本...">Hello    World!  
-这是一段    测试文本</textarea>
-                <div class="btn-group">
-                    <button onclick="textToUpper()">转大写</button>
-                    <button onclick="textToLower()">转小写</button>
-                    <button onclick="textReverse()">反转文本</button>
-                    <button onclick="textClear()">清空文本</button>
-                    <button onclick="countText()">字数统计</button>
-                    <button onclick="removeSpaces()">去除空格</button>
-                    <button onclick="removeAllSpaces()">去除所有空格</button>
-                </div>
-                <div class="result" id="textResult">等待操作...</div>
-            </div>
-        </div>
-
-        <!-- 编码解码工具 -->
-        <div class="tool-section" id="code-tool">
-            <button class="back-btn" onclick="showMainMenu()">← 返回主菜单</button>
-            <div class="tool-header">
-                <div class="tool-icon">🔐</div>
-                <div class="tool-title">编码解码工具</div>
-            </div>
-            <div class="tool-content">
-                <textarea id="codeInput" placeholder="输入要编码或解码的内容...">https://www.example.com/测试页面?name=张三&age=20</textarea>
-                <div class="btn-group">
-                    <button onclick="encodeBase64()">Base64编码</button>
-                    <button onclick="decodeBase64()">Base64解码</button>
-                    <button onclick="encodeURL()">URL编码</button>
-                    <button onclick="decodeURL()">URL解码</button>
-                </div>
-                <div class="result" id="codeResult">等待操作...</div>
-            </div>
-        </div>
-
-        <!-- 颜色工具 -->
-        <div class="tool-section" id="color-tool">
-            <button class="back-btn" onclick="showMainMenu()">← 返回主菜单</button>
-            <div class="tool-header">
-                <div class="tool-icon">🎨</div>
-                <div class="tool-title">颜色选择器</div>
-            </div>
-            <div class="tool-content">
-                <div class="tool-section">
-                    <label>选择颜色：</label>
-                    <input type="color" id="colorPicker" value="#667eea" onchange="updateColor()">
-                </div>
-                <div class="tool-section">
-                    <label>HEX值：</label>
-                    <input type="text" id="hexValue" value="#667eea" onchange="updateFromHex()">
-                </div>
-                <div class="tool-section">
-                    <label>RGB值：</label>
-                    <input type="text" id="rgbValue" readonly>
-                </div>
-                <div id="colorPreview" class="color-preview" style="background: #667eea;"></div>
-            </div>
-        </div>
-
-        <!-- 计时器 -->
-        <div class="tool-section" id="timer-tool">
-            <button class="back-btn" onclick="showMainMenu()">← 返回主菜单</button>
-            <div class="tool-header">
-                <div class="tool-icon">⏱️</div>
-                <div class="tool-title">计时器</div>
-            </div>
-            <div class="tool-content">
-                <div class="timer-display" id="timerDisplay">00:00:00</div>
-                <div class="btn-group">
-                    <button onclick="startTimer()">开始</button>
-                    <button onclick="pauseTimer()">暂停</button>
-                    <button onclick="resetTimer()">重置</button>
-                </div>
-                <div class="tool-section">
-                    <label>倒计时（分钟）：</label>
-                    <input type="number" id="countdownInput" min="1" value="5">
-                    <button onclick="startCountdown()">开始倒计时</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 单位换算 -->
-        <div class="tool-section" id="unit-tool">
-            <button class="back-btn" onclick="showMainMenu()">← 返回主菜单</button>
-            <div class="tool-header">
-                <div class="tool-icon">📏</div>
-                <div class="tool-title">单位换算</div>
-            </div>
-            <div class="tool-content">
-                <div class="tool-section">
-                    <h4>长度单位换算</h4>
-                    <input type="number" id="unitInput" placeholder="输入数值" value="1">
-                    <select id="unitFrom" onchange="convertUnits()">
-                        <option value="cm">厘米</option>
-                        <option value="m">米</option>
-                        <option value="km">千米</option>
-                        <option value="inch">英寸</option>
-                        <option value="foot">英尺</option>
-                    </select>
-                    <span>→</span>
-                    <select id="unitTo" onchange="convertUnits()">
-                        <option value="cm">厘米</option>
-                        <option value="m">米</option>
-                        <option value="km">千米</option>
-                        <option value="inch">英寸</option>
-                        <option value="foot">英尺</option>
-                    </select>
-                </div>
-                <div class="result" id="unitResult">1 厘米 = 0.01 米</div>
-                
-                <div class="tool-section">
-                    <h4>温度单位换算</h4>
-                    <input type="number" id="tempInput" placeholder="输入温度" value="0">
-                    <select id="tempFrom" onchange="convertTemp()">
-                        <option value="c">摄氏度 °C</option>
-                        <option value="f">华氏度 °F</option>
-                        <option value="k">开尔文 K</option>
-                    </select>
-                    <span>→</span>
-                    <select id="tempTo" onchange="convertTemp()">
-                        <option value="c">摄氏度 °C</option>
-                        <option value="f">华氏度 °F</option>
-                        <option value="k">开尔文 K</option>
-                    </select>
-                </div>
-                <div class="result" id="tempResult">0 °C = 32 °F</div>
-            </div>
-        </div>
-
-        <!-- 计算器 -->
-        <div class="tool-section" id="calc-tool">
-            <button class="back-btn" onclick="showMainMenu()">← 返回主菜单</button>
-            <div class="tool-header">
-                <div class="tool-icon">🧮</div>
-                <div class="tool-title">计算器</div>
-            </div>
-            <div class="tool-content">
-                <div class="tool-section">
-                    <h4>科学计算器</h4>
-                    <input type="text" id="calcInput" value="0" style="font-size: 1.2em; text-align: right; margin-bottom: 10px;">
+            <div class="right-panel">
+                <div class="ai-controls">
+                    <h3>⚙️ AI设置</h3>
                     
-                    <div class="calc-buttons">
-                        <button class="calc-btn" onclick="clearCalc()">C</button>
-                        <button class="calc-btn" onclick="backspace()">⌫</button>
-                        <button class="calc-btn" onclick="appendToCalc('%')">%</button>
-                        <button class="calc-btn" onclick="appendToCalc('/')">/</button>
-                        
-                        <button class="calc-btn" onclick="appendToCalc('7')">7</button>
-                        <button class="calc-btn" onclick="appendToCalc('8')">8</button>
-                        <button class="calc-btn" onclick="appendToCalc('9')">9</button>
-                        <button class="calc-btn" onclick="appendToCalc('*')">×</button>
-                        
-                        <button class="calc-btn" onclick="appendToCalc('4')">4</button>
-                        <button class="calc-btn" onclick="appendToCalc('5')">5</button>
-                        <button class="calc-btn" onclick="appendToCalc('6')">6</button>
-                        <button class="calc-btn" onclick="appendToCalc('-')">-</button>
-                        
-                        <button class="calc-btn" onclick="appendToCalc('1')">1</button>
-                        <button class="calc-btn" onclick="appendToCalc('2')">2</button>
-                        <button class="calc-btn" onclick="appendToCalc('3')">3</button>
-                        <button class="calc-btn" onclick="appendToCalc('+')">+</button>
-                        
-                        <button class="calc-btn" onclick="appendToCalc('0')" style="grid-column: span 2;">0</button>
-                        <button class="calc-btn" onclick="appendToCalc('.')">.</button>
-                        <button class="calc-btn" onclick="calculate()" style="background: #e53e3e;">=</button>
+                    <div class="ai-level-selector">
+                        <div class="level-btn active" data-level="2">中等 (深度4)</div>
+                        <div class="level-btn" data-level="1">简单 (深度2)</div>
+                        <div class="level-btn" data-level="3">困难 (深度6)</div>
                     </div>
                     
-                    <div class="result" id="calcResult">0</div>
+                    <div style="margin-top: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #666;">
+                            <input type="checkbox" id="autoAi" checked> 自动AI对战
+                        </label>
+                        <label style="display: block; margin-bottom: 8px; color: #666;">
+                            <input type="checkbox" id="showAnalysis"> 显示分析信息
+                        </label>
+                    </div>
                 </div>
                 
-                <div class="tool-section">
-                    <h4>随机数生成器</h4>
-                    <input type="number" id="minNum" placeholder="最小值" value="1">
-                    <input type="number" id="maxNum" placeholder="最大值" value="100">
-                    <button onclick="generateRandom()">生成随机数</button>
-                    <div class="result" id="randomResult"></div>
+                <div class="value-table">
+                    <h4>📊 AI评估权重 (Minimax优化)</h4>
+                    <div class="value-item">
+                        <span class="pattern-name">连五 (胜利)</span>
+                        <span class="pattern-value">+1000000</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="pattern-name">活四</span>
+                        <span class="pattern-value">+50000</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="pattern-name">冲四</span>
+                        <span class="pattern-value">+10000</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="pattern-name">活三</span>
+                        <span class="pattern-value">+5000</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="pattern-name">眠三</span>
+                        <span class="pattern-value">+500</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="pattern-name">活二</span>
+                        <span class="pattern-value">+200</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="pattern-name">双三</span>
+                        <span class="pattern-value">+20000</span>
+                    </div>
+                </div>
+                
+                <div id="aiStats" class="ai-stats" style="display: none;">
+                    <div><strong>AI思考统计：</strong></div>
+                    <div id="statsContent"></div>
+                </div>
+                
+                <div class="move-history">
+                    <div class="history-title">📝 走棋记录</div>
+                    <div id="historyList"></div>
                 </div>
             </div>
         </div>
-
-        <footer>
-            <p>© 2024 gaogao2013 的实用工具箱 | 简单创造效率</p>
-        </footer>
     </div>
 
     <script>
-        // 页面导航功能
-        function showMainMenu() {
-            document.querySelectorAll('.tool-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById('navMenu').style.display = 'grid';
-        }
-
-        function showTool(toolId) {
-            document.getElementById('navMenu').style.display = 'none';
-            document.querySelectorAll('.tool-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById(toolId).classList.add('active');
-        }
-
-        // 文本处理工具 - 修复空格问题
-        function textToUpper() {
-            const input = document.getElementById('textInput');
-            const result = document.getElementById('textResult');
-            input.value = input.value.toUpperCase();
-            result.textContent = '已转换为大写';
-        }
-
-        function textToLower() {
-            const input = document.getElementById('textInput');
-            const result = document.getElementById('textResult');
-            input.value = input.value.toLowerCase();
-            result.textContent = '已转换为小写';
-        }
-
-        function textReverse() {
-            const input = document.getElementById('textInput');
-            const result = document.getElementById('textResult');
-            input.value = input.value.split('').reverse().join('');
-            result.textContent = '已反转文本';
-        }
-
-        function textClear() {
-            document.getElementById('textInput').value = '';
-            document.getElementById('textResult').textContent = '文本已清空';
-        }
-
-        function countText() {
-            const input = document.getElementById('textInput');
-            const text = input.value;
-            const charCount = text.length;
-            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-            const lineCount = text ? text.split('\n').length : 0;
-            
-            document.getElementById('textResult').innerHTML = 
-                `字符数: ${charCount} | 单词数: ${wordCount} | 行数: ${lineCount}`;
-        }
-
-        function removeSpaces() {
-            const input = document.getElementById('textInput');
-            // 去除多余空格，保留单个空格
-            input.value = input.value.replace(/\s+/g, ' ').trim();
-            document.getElementById('textResult').textContent = '已去除多余空格，保留单词间单个空格';
-        }
-
-        function removeAllSpaces() {
-            const input = document.getElementById('textInput');
-            // 去除所有空格
-            input.value = input.value.replace(/\s+/g, '');
-            document.getElementById('textResult').textContent = '已去除所有空格';
-        }
-
-        // 编码解码工具 - 修复URL编码问题
-        function encodeBase64() {
-            const input = document.getElementById('codeInput');
-            const result = document.getElementById('codeResult');
-            try {
-                // 修复中文编码问题
-                const encoded = btoa(unescape(encodeURIComponent(input.value)));
-                result.textContent = encoded;
-            } catch (e) {
-                result.textContent = '编码失败: ' + e.message;
-            }
-        }
-
-        function decodeBase64() {
-            const input = document.getElementById('codeInput');
-            const result = document.getElementById('codeResult');
-            try {
-                const decoded = decodeURIComponent(escape(atob(input.value)));
-                result.textContent = decoded;
-            } catch (e) {
-                result.textContent = '解码失败: ' + e.message;
-            }
-        }
-
-        function encodeURL() {
-            const input = document.getElementById('codeInput');
-            const result = document.getElementById('codeResult');
-            try {
-                // 使用 encodeURIComponent 进行完整URL编码
-                const encoded = encodeURIComponent(input.value);
-                result.textContent = encoded;
-            } catch (e) {
-                result.textContent = '编码失败: ' + e.message;
-            }
-        }
-
-        function decodeURL() {
-            const input = document.getElementById('codeInput');
-            const result = document.getElementById('codeResult');
-            try {
-                // 使用 decodeURIComponent 进行URL解码
-                const decoded = decodeURIComponent(input.value);
-                result.textContent = decoded;
-            } catch (e) {
-                result.textContent = '解码失败: URL格式不正确';
-            }
-        }
-
-        // 颜色选择器
-        function updateColor() {
-            const colorPicker = document.getElementById('colorPicker');
-            const hexValue = document.getElementById('hexValue');
-            const rgbValue = document.getElementById('rgbValue');
-            const preview = document.getElementById('colorPreview');
-            
-            hexValue.value = colorPicker.value;
-            preview.style.background = colorPicker.value;
-            
-            const hex = colorPicker.value.replace('#', '');
-            const r = parseInt(hex.substr(0, 2), 16);
-            const g = parseInt(hex.substr(2, 2), 16);
-            const b = parseInt(hex.substr(4, 2), 16);
-            rgbValue.value = `rgb(${r}, ${g}, ${b})`;
-        }
-
-        function updateFromHex() {
-            const hexValue = document.getElementById('hexValue');
-            const colorPicker = document.getElementById('colorPicker');
-            const preview = document.getElementById('colorPreview');
-            
-            if (/^#[0-9A-F]{6}$/i.test(hexValue.value)) {
-                colorPicker.value = hexValue.value;
-                preview.style.background = hexValue.value;
-                updateColor();
-            }
-        }
-
-        // 计时器
-        let timer = null;
-        let timerSeconds = 0;
-        let isRunning = false;
-
-        function updateTimerDisplay() {
-            const hours = Math.floor(timerSeconds / 3600);
-            const minutes = Math.floor((timerSeconds % 3600) / 60);
-            const seconds = timerSeconds % 60;
-            
-            document.getElementById('timerDisplay').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function startTimer() {
-            if (!isRunning) {
-                isRunning = true;
-                timer = setInterval(() => {
-                    timerSeconds++;
-                    updateTimerDisplay();
-                }, 1000);
-            }
-        }
-
-        function pauseTimer() {
-            isRunning = false;
-            clearInterval(timer);
-        }
-
-        function resetTimer() {
-            pauseTimer();
-            timerSeconds = 0;
-            updateTimerDisplay();
-        }
-
-        function startCountdown() {
-            const minutes = parseInt(document.getElementById('countdownInput').value);
-            if (minutes > 0) {
-                pauseTimer();
-                timerSeconds = minutes * 60;
-                updateTimerDisplay();
-                startTimer();
-            }
-        }
-
-        // 单位换算
-        const unitConversions = {
-            cm: 1,
-            m: 100,
-            km: 100000,
-            inch: 2.54,
-            foot: 30.48
-        };
-
-        function convertUnits() {
-            const value = parseFloat(document.getElementById('unitInput').value) || 0;
-            const fromUnit = document.getElementById('unitFrom').value;
-            const toUnit = document.getElementById('unitTo').value;
-            
-            const valueInCm = value * unitConversions[fromUnit];
-            const convertedValue = valueInCm / unitConversions[toUnit];
-            
-            document.getElementById('unitResult').textContent = 
-                `${value} ${fromUnit} = ${convertedValue.toFixed(4)} ${toUnit}`;
-        }
-
-        function convertTemp() {
-            const value = parseFloat(document.getElementById('tempInput').value) || 0;
-            const fromUnit = document.getElementById('tempFrom').value;
-            const toUnit = document.getElementById('tempTo').value;
-            
-            let result;
-            
-            let inCelsius;
-            switch(fromUnit) {
-                case 'c': inCelsius = value; break;
-                case 'f': inCelsius = (value - 32) * 5/9; break;
-                case 'k': inCelsius = value - 273.15; break;
-            }
-            
-            switch(toUnit) {
-                case 'c': result = inCelsius; break;
-                case 'f': result = (inCelsius * 9/5) + 32; break;
-                case 'k': result = inCelsius + 273.15; break;
-            }
-            
-            const fromSymbol = fromUnit === 'c' ? '°C' : fromUnit === 'f' ? '°F' : 'K';
-            const toSymbol = toUnit === 'c' ? '°C' : toUnit === 'f' ? '°F' : 'K';
-            
-            document.getElementById('tempResult').textContent = 
-                `${value} ${fromSymbol} = ${result.toFixed(2)} ${toSymbol}`;
-        }
-
-        // 计算器 - 完全重写
-        let calcValue = '0';
-        let shouldReset = false;
-
-        function updateCalcDisplay() {
-            document.getElementById('calcInput').value = calcValue;
-            document.getElementById('calcResult').textContent = calcValue;
-        }
-
-        function appendToCalc(value) {
-            if (shouldReset) {
-                calcValue = '';
-                shouldReset = false;
-            }
-            
-            if (calcValue === '0' && value !== '.') {
-                calcValue = value;
-            } else {
-                calcValue += value;
-            }
-            updateCalcDisplay();
-        }
-
-        function clearCalc() {
-            calcValue = '0';
-            shouldReset = false;
-            updateCalcDisplay();
-        }
-
-        function backspace() {
-            if (calcValue.length > 1) {
-                calcValue = calcValue.slice(0, -1);
-            } else {
-                calcValue = '0';
-            }
-            updateCalcDisplay();
-        }
-
-        function calculate() {
-            try {
-                // 替换显示符号为计算符号
-                let expression = calcValue.replace(/×/g, '*').replace(/÷/g, '/');
+        class ProfessionalGomokuAI {
+            constructor() {
+                // 棋盘参数
+                this.boardSize = 15;
+                this.cellSize = 30;
+                this.padding = 15;
+                this.canvasSize = this.boardSize * this.cellSize + this.padding * 2;
                 
-                // 安全计算
-                const result = Function('"use strict"; return (' + expression + ')')();
-                calcValue = result.toString();
-                shouldReset = true;
-                updateCalcDisplay();
-            } catch (e) {
-                document.getElementById('calcResult').textContent = '计算错误';
+                // 游戏状态
+                this.board = Array(this.boardSize).fill().map(() => Array(this.boardSize).fill(0));
+                this.currentPlayer = 1; // 1: 玩家(黑), 2: AI(白)
+                this.gameOver = false;
+                this.winner = null;
+                this.moveHistory = [];
+                this.winningLine = [];
+                
+                // AI参数
+                this.aiLevel = 2;
+                this.aiThinking = false;
+                this.autoAI = true;
+                this.showAnalysis = false;
+                
+                // 性能统计
+                this.searchNodeCount = 0;
+                this.pruneCount = 0;
+                this.searchStartTime = 0;
+                
+                // 棋型价值表（优化版）
+                this.patternScores = {
+                    FIVE: 1000000,          // 连五胜利
+                    LIVE_FOUR: 50000,       // 活四
+                    SLEEP_FOUR: 10000,      // 冲四
+                    LIVE_THREE: 5000,       // 活三
+                    SLEEP_THREE: 500,       // 眠三
+                    LIVE_TWO: 200,          // 活二
+                    SLEEP_TWO: 50,          // 眠二
+                    
+                    OPPONENT_LIVE_FOUR: 80000,     // 对方活四
+                    OPPONENT_SLEEP_FOUR: 40000,    // 对方冲四
+                    OPPONENT_LIVE_THREE: 15000,    // 对方活三
+                    
+                    DOUBLE_THREE: 20000,           // 双三
+                    FOUR_THREE: 60000,             // 四三
+                };
+                
+                // 难度对应的搜索深度
+                this.depthByLevel = {1: 2, 2: 4, 3: 6};
+                
+                // 初始化
+                this.initialize();
+            }
+            
+            initialize() {
+                // 获取DOM元素
+                this.canvas = document.getElementById('boardCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.currentPlayerText = document.getElementById('currentPlayerText');
+                this.currentPlayerIndicator = document.getElementById('currentPlayerIndicator');
+                this.gameStatus = document.getElementById('gameStatus');
+                this.scoreInfo = document.getElementById('scoreInfo');
+                this.forbiddenWarning = document.getElementById('forbiddenWarning');
+                this.forbiddenReason = document.getElementById('forbiddenReason');
+                this.aiThinkingDiv = document.getElementById('aiThinking');
+                this.aiDepthSpan = document.getElementById('aiDepth');
+                this.historyList = document.getElementById('historyList');
+                this.aiStatsDiv = document.getElementById('aiStats');
+                this.statsContent = document.getElementById('statsContent');
+                
+                // 设置canvas尺寸
+                this.canvas.width = this.canvasSize;
+                this.canvas.height = this.canvasSize;
+                
+                // 绑定事件
+                this.setupEventListeners();
+                
+                // 开始游戏
+                this.resetGame();
+            }
+            
+            setupEventListeners() {
+                this.canvas.addEventListener('click', (e) => this.handleClick(e));
+                document.getElementById('restartBtn').addEventListener('click', () => this.resetGame());
+                document.getElementById('undoBtn').addEventListener('click', () => this.undoMove());
+                document.getElementById('aiMoveBtn').addEventListener('click', () => this.makeAIMove());
+                
+                // 难度选择
+                document.querySelectorAll('.level-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.aiLevel = parseInt(btn.dataset.level);
+                        this.aiDepthSpan.textContent = this.depthByLevel[this.aiLevel];
+                        this.scoreInfo.textContent = `Minimax AI | 深度: ${this.depthByLevel[this.aiLevel]}`;
+                    });
+                });
+                
+                // 自动AI开关
+                document.getElementById('autoAi').addEventListener('change', (e) => {
+                    this.autoAI = e.target.checked;
+                });
+                
+                // 分析显示开关
+                document.getElementById('showAnalysis').addEventListener('change', (e) => {
+                    this.showAnalysis = e.target.checked;
+                });
+            }
+            
+            // ============ 游戏核心逻辑 ============
+            
+            handleClick(e) {
+                if (this.gameOver || this.aiThinking || this.currentPlayer !== 1) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+                
+                const col = Math.round((x - this.padding) / this.cellSize);
+                const row = Math.round((y - this.padding) / this.cellSize);
+                
+                if (row >= 0 && row < this.boardSize && col >= 0 && col < this.boardSize) {
+                    this.tryMakeMove(row, col);
+                }
+            }
+            
+            tryMakeMove(row, col) {
+                if (this.board[row][col] !== 0) {
+                    this.showWarning("该位置已有棋子！");
+                    return false;
+                }
+                
+                // 检查禁手
+                if (this.isForbiddenMove(row, col, this.currentPlayer)) {
+                    return false;
+                }
+                
+                this.executeMove(row, col, false);
+                return true;
+            }
+            
+            executeMove(row, col, isAIMove = false) {
+                // 记录走棋
+                const moveNumber = this.moveHistory.length + 1;
+                this.moveHistory.push({
+                    row, col,
+                    player: this.currentPlayer,
+                    moveNumber,
+                    isAIMove,
+                    timestamp: Date.now()
+                });
+                
+                // 下棋
+                this.board[row][col] = this.currentPlayer;
+                
+                // 更新历史记录
+                this.updateHistory();
+                
+                // 检查胜利
+                if (this.checkWin(row, col)) {
+                    this.gameOver = true;
+                    this.winner = this.currentPlayer;
+                    this.showWinMessage();
+                    this.drawBoard();
+                    return;
+                }
+                
+                // 切换玩家
+                this.currentPlayer = 3 - this.currentPlayer;
+                
+                // 更新界面
+                this.drawBoard();
+                this.updateStatus();
+                
+                // 如果是玩家走棋且开启了自动AI，让AI走棋
+                if (!isAIMove && this.autoAI && this.currentPlayer === 2 && !this.gameOver) {
+                    setTimeout(() => this.makeAIMove(), 300);
+                }
+            }
+            
+            // ============ Minimax Alpha-Beta AI核心算法 ============
+            
+            async makeAIMove() {
+                if (this.gameOver || this.currentPlayer !== 2 || this.aiThinking) return;
+                
+                this.aiThinking = true;
+                this.aiThinkingDiv.style.display = 'flex';
+                
+                // 重置统计
+                this.searchNodeCount = 0;
+                this.pruneCount = 0;
+                this.searchStartTime = Date.now();
+                
+                try {
+                    const depth = this.depthByLevel[this.aiLevel];
+                    const bestMove = this.findBestMoveWithMinimax(depth);
+                    
+                    if (bestMove) {
+                        this.executeMove(bestMove.row, bestMove.col, true);
+                        
+                        // 显示统计信息
+                        if (this.showAnalysis) {
+                            this.showAITimings();
+                        }
+                    }
+                } catch (error) {
+                    console.error('AI思考出错:', error);
+                    // 出错时使用简单算法
+                    const simpleMove = this.findBestMoveSimple();
+                    if (simpleMove) {
+                        this.executeMove(simpleMove.row, simpleMove.col, true);
+                    }
+                } finally {
+                    this.aiThinking = false;
+                    this.aiThinkingDiv.style.display = 'none';
+                }
+            }
+            
+            findBestMoveWithMinimax(maxDepth) {
+                // 1. 检查立即获胜
+                const winMove = this.findImmediateWin(2);
+                if (winMove) return winMove;
+                
+                // 2. 紧急防守
+                const blockMove = this.findImmediateWin(1);
+                if (blockMove && !this.isForbiddenMove(blockMove.row, blockMove.col, 2)) {
+                    return blockMove;
+                }
+                
+                // 3. 使用Minimax Alpha-Beta搜索
+                const candidateMoves = this.getCandidateMovesOptimized(2);
+                
+                let bestScore = -Infinity;
+                let bestMove = null;
+                let alpha = -Infinity;
+                let beta = Infinity;
+                
+                for (const move of candidateMoves) {
+                    const {row, col} = move;
+                    
+                    // 跳过禁手位置
+                    if (this.isForbiddenMove(row, col, 2)) continue;
+                    
+                    // 尝试走棋
+                    this.board[row][col] = 2;
+                    
+                    // Alpha-Beta剪枝搜索
+                    const score = this.minimaxAlphaBeta(
+                        maxDepth - 1, 
+                        alpha, 
+                        beta, 
+                        false, // 下一步是对手
+                        1      // 对手是黑棋
+                    );
+                    
+                    // 撤销走棋
+                    this.board[row][col] = 0;
+                    
+                    // 更新最佳走法
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = {row, col};
+                        alpha = Math.max(alpha, score);
+                    }
+                    
+                    if (beta <= alpha) {
+                        this.pruneCount++;
+                        break; // Beta剪枝
+                    }
+                }
+                
+                return bestMove;
+            }
+            
+            minimaxAlphaBeta(depth, alpha, beta, isMaximizing, player) {
+                this.searchNodeCount++;
+                
+                // 终止条件：达到深度限制或游戏结束
+                if (depth === 0 || this.isGameTerminal()) {
+                    return this.evaluateBoard(player === 2);
+                }
+                
+                const currentPlayer = isMaximizing ? 2 : 1;
+                const candidateMoves = this.getCandidateMovesOptimized(currentPlayer);
+                
+                if (isMaximizing) {
+                    let maxEval = -Infinity;
+                    
+                    for (const move of candidateMoves) {
+                        const {row, col} = move;
+                        
+                        if (this.isForbiddenMove(row, col, currentPlayer)) continue;
+                        
+                        this.board[row][col] = currentPlayer;
+                        
+                        const evaluation = this.minimaxAlphaBeta(
+                            depth - 1, 
+                            alpha, 
+                            beta, 
+                            false, 
+                            3 - currentPlayer
+                        );
+                        
+                        this.board[row][col] = 0;
+                        
+                        maxEval = Math.max(maxEval, evaluation);
+                        alpha = Math.max(alpha, evaluation);
+                        
+                        if (beta <= alpha) {
+                            this.pruneCount++;
+                            break; // Beta剪枝
+                        }
+                    }
+                    
+                    return maxEval;
+                } else {
+                    let minEval = Infinity;
+                    
+                    for (const move of candidateMoves) {
+                        const {row, col} = move;
+                        
+                        if (this.isForbiddenMove(row, col, currentPlayer)) continue;
+                        
+                        this.board[row][col] = currentPlayer;
+                        
+                        const evaluation = this.minimaxAlphaBeta(
+                            depth - 1, 
+                            alpha, 
+                            beta, 
+                            true, 
+                            3 - currentPlayer
+                        );
+                        
+                        this.board[row][col] = 0;
+                        
+                        minEval = Math.min(minEval, evaluation);
+                        beta = Math.min(beta, evaluation);
+                        
+                        if (beta <= alpha) {
+                            this.pruneCount++;
+                            break; // Alpha剪枝
+                        }
+                    }
+                    
+                    return minEval;
+                }
+            }
+            
+            findImmediateWin(player) {
+                for (let i = 0; i < this.boardSize; i++) {
+                    for (let j = 0; j < this.boardSize; j++) {
+                        if (this.board[i][j] === 0) {
+                            this.board[i][j] = player;
+                            
+                            if (this.checkWin(i, j)) {
+                                this.board[i][j] = 0;
+                                return {row: i, col: j};
+                            }
+                            
+                            this.board[i][j] = 0;
+                        }
+                    }
+                }
+                return null;
+            }
+            
+            isGameTerminal() {
+                // 检查是否有五连
+                for (let i = 0; i < this.boardSize; i++) {
+                    for (let j = 0; j < this.boardSize; j++) {
+                        if (this.board[i][j] !== 0) {
+                            const player = this.board[i][j];
+                            const directions = [[0,1], [1,0], [1,1], [1,-1]];
+                            
+                            for (const [dr, dc] of directions) {
+                                let count = 1;
+                                let r = i + dr, c = j + dc;
+                                
+                                while (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize &&
+                                       this.board[r][c] === player) {
+                                    count++;
+                                    r += dr;
+                                    c += dc;
+                                }
+                                
+                                r = i - dr;
+                                c = j - dc;
+                                while (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize &&
+                                       this.board[r][c] === player) {
+                                    count++;
+                                    r -= dr;
+                                    c -= dc;
+                                }
+                                
+                                if (count >= 5) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            evaluateBoard(isAITurn) {
+                let score = 0;
+                const aiPlayer = 2;
+                const humanPlayer = 1;
+                
+                // 评估整个棋盘
+                for (let i = 0; i < this.boardSize; i++) {
+                    for (let j = 0; j < this.boardSize; j++) {
+                        if (this.board[i][j] === aiPlayer) {
+                            score += this.evaluatePosition(i, j, aiPlayer, true);
+                        } else if (this.board[i][j] === humanPlayer) {
+                            score -= this.evaluatePosition(i, j, humanPlayer, false) * 1.2;
+                        }
+                    }
+                }
+                
+                return score;
+            }
+            
+            evaluatePosition(row, col, player, isAI) {
+                let score = 0;
+                const directions = [[0,1], [1,0], [1,1], [1,-1]];
+                
+                for (const [dr, dc] of directions) {
+                    const pattern = this.getDirectionPatternExtended(row, col, dr, dc, 9);
+                    score += this.evaluatePattern(pattern, player, isAI);
+                }
+                
+                // 位置优势
+                const center = Math.floor(this.boardSize / 2);
+                const dist = Math.abs(row - center) + Math.abs(col - center);
+                score += (this.boardSize - dist) * 10;
+                
+                return score;
+            }
+            
+            evaluatePattern(pattern, player, isAI) {
+                const patternStr = pattern.map(cell => {
+                    if (cell === player) return '1';
+                    if (cell === 0) return '0';
+                    return 'x';
+                }).join('');
+                
+                let score = 0;
+                
+                // 连五
+                if (patternStr.includes('11111')) {
+                    return this.patternScores.FIVE;
+                }
+                
+                // 活四
+                if (patternStr.includes('011110')) {
+                    score += isAI ? this.patternScores.LIVE_FOUR : this.patternScores.OPPONENT_LIVE_FOUR;
+                }
+                
+                // 冲四
+                if (this.containsSleepFour(patternStr)) {
+                    score += isAI ? this.patternScores.SLEEP_FOUR : this.patternScores.OPPONENT_SLEEP_FOUR;
+                }
+                
+                // 活三
+                if (this.containsLiveThree(patternStr)) {
+                    score += isAI ? this.patternScores.LIVE_THREE : this.patternScores.OPPONENT_LIVE_THREE;
+                }
+                
+                // 眠三
+                if (this.containsSleepThree(patternStr)) {
+                    score += this.patternScores.SLEEP_THREE;
+                }
+                
+                // 活二
+                if (this.containsLiveTwo(patternStr)) {
+                    score += this.patternScores.LIVE_TWO;
+                }
+                
+                return score;
+            }
+            
+            containsSleepFour(patternStr) {
+                const sleepFourPatterns = [
+                    '011112', '211110',     // 单边冲四
+                    '10111', '11101', '11011'  // 跳冲四
+                ];
+                
+                for (const pattern of sleepFourPatterns) {
+                    if (patternStr.includes(pattern)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            containsLiveThree(patternStr) {
+                const liveThreePatterns = [
+                    '01110',     // 中间活三
+                    '010110',    // 跳活三
+                    '011010',    // 跳活三
+                    '0011100'    // 另一种活三
+                ];
+                
+                for (const pattern of liveThreePatterns) {
+                    if (patternStr.includes(pattern)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            containsSleepThree(patternStr) {
+                const sleepThreePatterns = [
+                    '01112', '21110',
+                    '010112', '211010',
+                    '011012', '210110'
+                ];
+                
+                for (const pattern of sleepThreePatterns) {
+                    if (patternStr.includes(pattern)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            containsLiveTwo(patternStr) {
+                const liveTwoPatterns = [
+                    '001100', '01010', '010010',
+                    '0010100', '00011000'
+                ];
+                
+                for (const pattern of liveTwoPatterns) {
+                    if (patternStr.includes(pattern)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            getDirectionPatternExtended(row, col, dr, dc, length) {
+                const pattern = [];
+                const offset = Math.floor(length / 2);
+                
+                for (let i = -offset; i <= offset; i++) {
+                    const r = row + dr * i;
+                    const c = col + dc * i;
+                    
+                    if (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize) {
+                        pattern.push(this.board[r][c]);
+                    } else {
+                        pattern.push(-1); // 边界外
+                    }
+                }
+                
+                return pattern;
+            }
+            
+            getCandidateMovesOptimized(player) {
+                const moves = [];
+                const scores = [];
+                const visited = new Set();
+                
+                // 搜索半径
+                const searchRadius = this.aiLevel === 3 ? 3 : 2;
+                
+                // 优先搜索已有棋子周围
+                for (let i = 0; i < this.boardSize; i++) {
+                    for (let j = 0; j < this.boardSize; j++) {
+                        if (this.board[i][j] !== 0) {
+                            for (let di = -searchRadius; di <= searchRadius; di++) {
+                                for (let dj = -searchRadius; dj <= searchRadius; dj++) {
+                                    const ni = i + di;
+                                    const nj = j + dj;
+                                    
+                                    if (ni >= 0 && ni < this.boardSize && nj >= 0 && nj < this.boardSize &&
+                                        this.board[ni][nj] === 0) {
+                                        const key = `${ni},${nj}`;
+                                        if (!visited.has(key)) {
+                                            visited.add(key);
+                                            // 计算位置分数用于排序
+                                            const score = this.evaluateMovePotential(ni, nj, player);
+                                            moves.push({row: ni, col: nj});
+                                            scores.push(score);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // 如果没有候选位置，选择中心区域
+                if (moves.length === 0) {
+                    const center = Math.floor(this.boardSize / 2);
+                    for (let i = center - 1; i <= center + 1; i++) {
+                        for (let j = center - 1; j <= center + 1; j++) {
+                            if (i >= 0 && i < this.boardSize && j >= 0 && j < this.boardSize &&
+                                this.board[i][j] === 0) {
+                                moves.push({row: i, col: j});
+                            }
+                        }
+                    }
+                }
+                
+                // 根据分数排序（提高Alpha-Beta效率）
+                const sortedIndices = scores.map((_, index) => index)
+                    .sort((a, b) => scores[b] - scores[a]);
+                
+                return sortedIndices.map(idx => moves[idx]);
+            }
+            
+            evaluateMovePotential(row, col, player) {
+                let score = 0;
+                
+                // 中心优势
+                const center = Math.floor(this.boardSize / 2);
+                const dist = Math.abs(row - center) + Math.abs(col - center);
+                score += (this.boardSize - dist) * 10;
+                
+                // 周边棋子影响
+                for (let i = Math.max(0, row - 2); i <= Math.min(this.boardSize - 1, row + 2); i++) {
+                    for (let j = Math.max(0, col - 2); j <= Math.min(this.boardSize - 1, col + 2); j++) {
+                        if (this.board[i][j] === player) {
+                            const distance = Math.abs(i - row) + Math.abs(j - col);
+                            score += (3 - distance) * 50;
+                        } else if (this.board[i][j] === 3 - player) {
+                            const distance = Math.abs(i - row) + Math.abs(j - col);
+                            score += (3 - distance) * 30;
+                        }
+                    }
+                }
+                
+                return score;
+            }
+            
+            findBestMoveSimple() {
+                // 简单的威胁检测作为备用
+                const winMove = this.findImmediateWin(2);
+                if (winMove) return winMove;
+                
+                const blockMove = this.findImmediateWin(1);
+                if (blockMove && !this.isForbiddenMove(blockMove.row, blockMove.col, 2)) {
+                    return blockMove;
+                }
+                
+                // 随机选择一个候选位置
+                const candidateMoves = this.getCandidateMovesOptimized(2);
+                if (candidateMoves.length > 0) {
+                    return candidateMoves[0];
+                }
+                
+                return null;
+            }
+            
+            showAITimings() {
+                const searchTime = Date.now() - this.searchStartTime;
+                
+                this.statsContent.innerHTML = `
+                    <div>搜索时间: ${searchTime}ms</div>
+                    <div>搜索节点数: ${this.searchNodeCount}</div>
+                    <div>剪枝次数: ${this.pruneCount}</div>
+                    <div>搜索深度: ${this.depthByLevel[this.aiLevel]}</div>
+                `;
+                
+                this.aiStatsDiv.style.display = 'block';
+                
+                // 5秒后隐藏统计信息
+                setTimeout(() => {
+                    if (this.aiStatsDiv) {
+                        this.aiStatsDiv.style.display = 'none';
+                    }
+                }, 5000);
+            }
+            
+            // ============ 禁手检测 ============
+            isForbiddenMove(row, col, player) {
+                if (this.board[row][col] !== 0) return false;
+                
+                this.board[row][col] = player;
+                
+                let isForbidden = false;
+                let reason = "";
+                
+                // 长连禁手
+                const longChain = this.checkLongChain(row, col, player);
+                if (longChain > 5) {
+                    isForbidden = true;
+                    reason = `长连禁手 (${longChain}连)`;
+                }
+                
+                // 黑棋的其他禁手
+                if (player === 1 && !isForbidden) {
+                    const threeCount = this.countLiveThrees(row, col);
+                    const fourCount = this.countFours(row, col);
+                    
+                    if (threeCount >= 2) {
+                        isForbidden = true;
+                        reason = `三三禁手 (${threeCount}个活三)`;
+                    } else if (fourCount >= 2) {
+                        isForbidden = true;
+                        reason = `四四禁手 (${fourCount}个四)`;
+                    } else if (fourCount >= 1 && threeCount >= 2) {
+                        isForbidden = true;
+                        reason = `四三三禁手`;
+                    }
+                }
+                
+                this.board[row][col] = 0;
+                
+                if (isForbidden) {
+                    this.showForbiddenWarning(reason);
+                }
+                
+                return isForbidden;
+            }
+            
+            checkLongChain(row, col, player) {
+                let maxLength = 0;
+                const directions = [[0,1], [1,0], [1,1], [1,-1]];
+                
+                for (const [dr, dc] of directions) {
+                    let length = 1;
+                    
+                    let r = row + dr, c = col + dc;
+                    while (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize &&
+                           this.board[r][c] === player) {
+                        length++;
+                        r += dr;
+                        c += dc;
+                    }
+                    
+                    r = row - dr;
+                    c = col - dc;
+                    while (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize &&
+                           this.board[r][c] === player) {
+                        length++;
+                        r -= dr;
+                        c -= dc;
+                    }
+                    
+                    maxLength = Math.max(maxLength, length);
+                }
+                
+                return maxLength;
+            }
+            
+            countLiveThrees(row, col) {
+                let count = 0;
+                const directions = [[0,1], [1,0], [1,1], [1,-1]];
+                
+                for (const [dr, dc] of directions) {
+                    const pattern = this.getDirectionPatternExtended(row, col, dr, dc, 7);
+                    const patternStr = pattern.map(cell => {
+                        if (cell === 1) return '1';
+                        if (cell === 0) return '0';
+                        return 'x';
+                    }).join('');
+                    
+                    if (this.containsLiveThree(patternStr)) {
+                        count++;
+                    }
+                }
+                
+                return count;
+            }
+            
+            countFours(row, col) {
+                let count = 0;
+                const directions = [[0,1], [1,0], [1,1], [1,-1]];
+                
+                for (const [dr, dc] of directions) {
+                    const pattern = this.getDirectionPatternExtended(row, col, dr, dc, 6);
+                    const patternStr = pattern.map(cell => {
+                        if (cell === 1) return '1';
+                        if (cell === 0) return '0';
+                        return 'x';
+                    }).join('');
+                    
+                    if (patternStr.includes('011110') || this.containsSleepFour(patternStr)) {
+                        count++;
+                    }
+                }
+                
+                return count;
+            }
+            
+            // ============ 其他游戏方法 ============
+            
+            checkWin(row, col) {
+                const player = this.board[row][col];
+                const directions = [[0,1], [1,0], [1,1], [1,-1]];
+                this.winningLine = [];
+                
+                for (const [dr, dc] of directions) {
+                    let count = 1;
+                    let winningLine = [{row, col}];
+                    
+                    let r = row + dr, c = col + dc;
+                    while (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize &&
+                           this.board[r][c] === player) {
+                        count++;
+                        winningLine.push({row: r, col: c});
+                        r += dr;
+                        c += dc;
+                    }
+                    
+                    r = row - dr;
+                    c = col - dc;
+                    while (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize &&
+                           this.board[r][c] === player) {
+                        count++;
+                        winningLine.unshift({row: r, col: c});
+                        r -= dr;
+                        c -= dc;
+                    }
+                    
+                    if (count >= 5) {
+                        this.winningLine = winningLine;
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            showForbiddenWarning(reason) {
+                this.forbiddenReason.textContent = reason;
+                this.forbiddenWarning.style.display = 'block';
+                
+                setTimeout(() => {
+                    this.forbiddenWarning.style.display = 'none';
+                }, 3000);
+            }
+            
+            showWarning(message) {
+                this.forbiddenReason.textContent = message;
+                this.forbiddenWarning.style.display = 'block';
+                
+                setTimeout(() => {
+                    this.forbiddenWarning.style.display = 'none';
+                }, 2000);
+            }
+            
+            showWinMessage() {
+                const winnerName = this.winner === 1 ? '黑棋 (玩家)' : '白棋 (AI)';
+                this.gameStatus.textContent = `${winnerName} 获胜`;
+                
+                setTimeout(() => {
+                    alert(`🎉 ${winnerName} 获胜！`);
+                }, 100);
+            }
+            
+            // ============ 绘图方法 ============
+            
+            drawBoard() {
+                const ctx = this.ctx;
+                const size = this.boardSize;
+                const cellSize = this.cellSize;
+                const padding = this.padding;
+                
+                // 清空画布
+                ctx.clearRect(0, 0, this.canvasSize, this.canvasSize);
+                
+                // 绘制棋盘背景
+                ctx.fillStyle = '#f0d9b5';
+                ctx.fillRect(padding, padding, (size-1) * cellSize, (size-1) * cellSize);
+                
+                // 绘制网格线
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                
+                for (let i = 0; i < size; i++) {
+                    // 横线
+                    ctx.beginPath();
+                    ctx.moveTo(padding, i * cellSize + padding);
+                    ctx.lineTo((size-1) * cellSize + padding, i * cellSize + padding);
+                    ctx.stroke();
+                    
+                    // 竖线
+                    ctx.beginPath();
+                    ctx.moveTo(i * cellSize + padding, padding);
+                    ctx.lineTo(i * cellSize + padding, (size-1) * cellSize + padding);
+                    ctx.stroke();
+                }
+                
+                // 绘制天元和星位
+                const stars = [[3,3], [3,11], [7,7], [11,3], [11,11]];
+                ctx.fillStyle = '#000';
+                stars.forEach(([x, y]) => {
+                    ctx.beginPath();
+                    ctx.arc(
+                        x * cellSize + padding,
+                        y * cellSize + padding,
+                        4, 0, Math.PI * 2
+                    );
+                    ctx.fill();
+                });
+                
+                // 绘制棋子
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        if (this.board[i][j] !== 0) {
+                            this.drawStone(j, i, this.board[i][j]);
+                        }
+                    }
+                }
+                
+                // 绘制获胜连线
+                if (this.winningLine.length > 0) {
+                    this.drawWinningLine();
+                }
+                
+                // 标记最后一步
+                if (this.moveHistory.length > 0) {
+                    const lastMove = this.moveHistory[this.moveHistory.length - 1];
+                    this.drawLastMoveMarker(lastMove.col, lastMove.row);
+                }
+            }
+            
+            drawStone(x, y, player) {
+                const ctx = this.ctx;
+                const cellSize = this.cellSize;
+                const padding = this.padding;
+                const radius = cellSize * 0.42;
+                
+                const stoneX = x * cellSize + padding;
+                const stoneY = y * cellSize + padding;
+                
+                ctx.beginPath();
+                ctx.arc(stoneX, stoneY, radius, 0, Math.PI * 2);
+                
+                if (player === 1) {
+                    // 黑棋
+                    const gradient = ctx.createRadialGradient(
+                        stoneX - 3, stoneY - 3, 0,
+                        stoneX, stoneY, radius
+                    );
+                    gradient.addColorStop(0, '#666');
+                    gradient.addColorStop(1, '#000');
+                    ctx.fillStyle = gradient;
+                } else {
+                    // 白棋
+                    const gradient = ctx.createRadialGradient(
+                        stoneX - 3, stoneY - 3, 0,
+                        stoneX, stoneY, radius
+                    );
+                    gradient.addColorStop(0, '#fff');
+                    gradient.addColorStop(1, '#ddd');
+                    ctx.fillStyle = gradient;
+                    ctx.strokeStyle = '#666';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+                
+                ctx.fill();
+            }
+            
+            drawWinningLine() {
+                const ctx = this.ctx;
+                const cellSize = this.cellSize;
+                const padding = this.padding;
+                
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                
+                ctx.beginPath();
+                this.winningLine.forEach((pos, index) => {
+                    const x = pos.col * cellSize + padding;
+                    const y = pos.row * cellSize + padding;
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+            }
+            
+            drawLastMoveMarker(x, y) {
+                const ctx = this.ctx;
+                const cellSize = this.cellSize;
+                const padding = this.padding;
+                
+                const markerX = x * cellSize + padding;
+                const markerY = y * cellSize + padding;
+                
+                ctx.beginPath();
+                ctx.arc(markerX, markerY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff0000';
+                ctx.fill();
+            }
+            
+            undoMove() {
+                if (this.gameOver || this.moveHistory.length === 0 || this.aiThinking) return;
+                
+                const lastMove = this.moveHistory.pop();
+                this.board[lastMove.row][lastMove.col] = 0;
+                
+                this.gameOver = false;
+                this.winner = null;
+                this.winningLine = [];
+                
+                this.currentPlayer = lastMove.player;
+                
+                this.drawBoard();
+                this.updateStatus();
+                this.updateHistory();
+            }
+            
+            resetGame() {
+                this.board = Array(this.boardSize).fill().map(() => Array(this.boardSize).fill(0));
+                this.currentPlayer = 1;
+                this.gameOver = false;
+                this.winner = null;
+                this.moveHistory = [];
+                this.winningLine = [];
+                this.aiThinking = false;
+                
+                this.drawBoard();
+                this.updateStatus();
+                this.updateHistory();
+                this.forbiddenWarning.style.display = 'none';
+                this.aiThinkingDiv.style.display = 'none';
+                this.aiStatsDiv.style.display = 'none';
+            }
+            
+            updateStatus() {
+                if (this.gameOver) {
+                    const winnerName = this.winner === 1 ? '黑棋 (玩家)' : '白棋 (AI)';
+                    this.gameStatus.textContent = `${winnerName} 获胜`;
+                    this.currentPlayerText.textContent = '游戏结束';
+                } else {
+                    if (this.currentPlayer === 1) {
+                        this.currentPlayerText.textContent = '黑棋 (玩家)';
+                        this.currentPlayerIndicator.className = 'player-indicator black-indicator';
+                        this.currentPlayerIndicator.textContent = '●';
+                        this.gameStatus.textContent = '轮到玩家走棋';
+                    } else {
+                        this.currentPlayerText.textContent = '白棋 (AI)';
+                        this.currentPlayerIndicator.className = 'player-indicator white-indicator';
+                        this.currentPlayerIndicator.textContent = '○';
+                        this.gameStatus.textContent = '等待AI思考...';
+                    }
+                }
+            }
+            
+            updateHistory() {
+                this.historyList.innerHTML = '';
+                
+                for (let i = 0; i < this.moveHistory.length; i++) {
+                    const move = this.moveHistory[i];
+                    const historyItem = document.createElement('div');
+                    historyItem.className = `history-item ${move.isAIMove ? 'ai-move' : ''}`;
+                    
+                    const playerText = move.player === 1 ? '黑' : '白';
+                    const moveType = move.isAIMove ? '(AI)' : '(玩家)';
+                    
+                    historyItem.innerHTML = `
+                        <span>第${move.moveNumber}手: ${playerText}棋 ${moveType}</span>
+                        <span>(${move.col}, ${move.row})</span>
+                    `;
+                    
+                    this.historyList.appendChild(historyItem);
+                }
+                
+                // 滚动到底部
+                this.historyList.scrollTop = this.historyList.scrollHeight;
             }
         }
-
-        function generateRandom() {
-            const min = parseInt(document.getElementById('minNum').value) || 0;
-            const max = parseInt(document.getElementById('maxNum').value) || 100;
-            
-            if (min >= max) {
-                document.getElementById('randomResult').textContent = '最小值必须小于最大值';
-                return;
-            }
-            
-            const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-            document.getElementById('randomResult').textContent = `随机数: ${randomNum}`;
-        }
-
-        // 初始化
-        updateColor();
-        convertUnits();
-        convertTemp();
-        updateCalcDisplay();
+        
+        // 页面加载完成后初始化游戏
+        window.addEventListener('DOMContentLoaded', () => {
+            const game = new ProfessionalGomokuAI();
+            window.game = game;
+        });
     </script>
 </body>
 </html>
